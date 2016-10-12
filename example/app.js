@@ -6,8 +6,7 @@ const ecstatic   = require('ecstatic')(__dirname + '/public')
 const body       = require('body/any')
 const xtend      = require('xtend')
 const store      = require('./lib/store')
-const SessionMan = require('session-man')
-const sessionMan = new SessionMan(store, {
+const sessionMan = require('session-man')(store, {
     key: 'app.test.session'
   , timeout: 5 * 60// 5min
 })
