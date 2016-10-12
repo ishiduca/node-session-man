@@ -1,0 +1,37 @@
+<!doctype html>
+<head>
+    <title>{{TITLE}}</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+    {{#MENU}}
+    <div>
+        <a href="{{HREF}}">{{TEXT}}</a>
+    </div>
+    {{/MENU}}
+    <form
+        method="{{METHOD}}"
+        action="{{ACTION}}"
+    >
+        <h2>{{TITLE}}</h2>
+        <dl style="width: 300px;">
+            <dt><h3>screen name</h3></dt>
+            <dd><input
+                type="text"
+                name="screen_name"
+                placeholder="screen name (ex: 'Monk'"
+                pattern="^[0-9A-Za-z\-.]{2,6}$"
+                required
+            /></dd>
+            <dt><h3>password</h3></dt>
+            <dd><input
+                type="password"
+                name="password"
+                placeholder="password (ex: 'hogehoge'"
+                pattern="^[0-9A-Za-z\-.]{6,12}$"
+                required
+            /></dd>
+            <div style="text-align: center;"><button type="submit">{{SUBMIT_BUTTON}}</button></div>
+        </dl>
+    </form>
+</body>

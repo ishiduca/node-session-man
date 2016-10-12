@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "body": "^5.1.0",
+    "ecstatic": "^2.1.0",
+    "hogan-hammer": "0.0.4",
+    "leveldown": "^1.5.0",
+    "levelup": "^1.3.3",
+    "router-line": "^0.2.1",
+    "session-man": "file:..",
+    "xtend": "^4.0.1"
+  },
+  "scripts": {
+    "prestart": "rm -rf ./session/* ./dbs/*",
+    "start": "node app"
+  }
+}

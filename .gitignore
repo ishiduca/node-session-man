@@ -1,0 +1,7 @@
+node_modules/
+npm-debug.log
+*.swp
+*.DS_Store
+example/node_modules/
+example/dbs/
+example/session/
