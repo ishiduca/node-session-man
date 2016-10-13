@@ -5,15 +5,17 @@ const router     = new (require('router-line').Router)
 const ecstatic   = require('ecstatic')(__dirname + '/public')
 const body       = require('body/any')
 const xtend      = require('xtend')
-const store      = require('./lib/store')
+const store      = require('session/store')(__dirname + '/session/store')
 const sessionMan = require('session-man')(store, {
     key: 'app.test.session'
   , timeout: 5 * 60// 5min
 })
+const levelup        = require('levelup')
+const accountsDb     = levelup(__dirname + '/dbs/accounts', {valueEncoding: 'json'})
+const accountsSchema = require('model/validate/account')
 
-const levelup = require('levelup')
-const api = require('./api')({
-    accounts: levelup('./dbs/accounts', {valueEncoding: 'json'})
+const api = require('api')({
+    accounts: require('model/account')(accountsDb, accountsSchema)
   , templates: __dirname + '/html'
 })
 

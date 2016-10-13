@@ -5,3 +5,4 @@ npm-debug.log
 example/node_modules/
 example/dbs/
 example/session/
+example/t/dbs/

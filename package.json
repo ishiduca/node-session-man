@@ -10,6 +10,12 @@
     "session",
     "cookie"
   ],
+  "files": [
+    "README.md",
+    "index.js",
+    "lib",
+    "package.json"
+  ],
   "author": "ishiduca@gmail.com",
   "license": "MIT",
   "devDependencies": {

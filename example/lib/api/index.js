@@ -4,6 +4,9 @@ const fs       = require('fs')
 const hammer   = require('hogan-hammer')
 
 module.exports = (config) => {
+    const accounts  = config.accounts
+    const templates = config.templates
+
     return {
         app:     app
       , signup:  signup
@@ -16,11 +19,11 @@ module.exports = (config) => {
     }
 
     function app (ses, req, res, params) {
-        ses.get((err, user) => {
-            if (!user) return redirect('/signin', res)
-            render(path.join(config.templates, 'app.html'), {
+        ses.get((err, accountId) => {
+            if (!accountId) return redirect('/signin', res)
+            render(path.join(templates, 'app.html'), {
                 TITLE: 'app'
-              , USER: user
+              , USER: accountId
               , MENU: [
                     {TEXT: 'sign out', HREF: '/signout'}
                 ]
@@ -29,7 +32,7 @@ module.exports = (config) => {
     }
 
     function signup (req, res, params) {
-        render(path.join(config.templates, 'signin.html'), {
+        render(path.join(templates, 'signin.html'), {
             TITLE: 'Sign up'
           , METHOD: 'POST'
           , ACTION: '/signup'
@@ -42,10 +45,10 @@ module.exports = (config) => {
     }
 
     function signin (ses, req, res, params) {
-        ses.get((err, user) => {
-            if (user) return redirect('/', res)
+        ses.get((err, accountId) => {
+            if (accountId) return redirect('/', res)
 
-            render(path.join(config.templates, 'signin.html'), {
+            render(path.join(templates, 'signin.html'), {
                 TITLE: 'Sign in'
               , METHOD: 'POST'
               , ACTION: '/signin'
@@ -66,46 +69,22 @@ module.exports = (config) => {
     }
 
     function postSignup (ses, req, res, params) {
-        const accounts = config.accounts
-        accounts.get(params.screen_name, (err, user) => {
-            if (err && err.type === 'NotFoundError') return put()
-            else if (user) {
-                err = new Error('this "screen_name" is already in use')
-                err.name = 'ScreenNameError'
-                return onError(err, res)
-            }
-            else onError(err, res)
-        })
-
-        function put () {
-            accounts.put(params.screen_name, params, err => {
+        accounts.create(params, (err, accountId) => {
+            if (err) return onError(err, res)
+            ses.put(accountId, err => {
                 if (err) return onError(err, res)
-                ses.put(params.screen_name, err => {
-                    if (err) return onError(err, res)
-                    else redirect('/', res)
-                })
+                else redirect('/', res)
             })
-        }
+        })
     }
 
     function postSignin (ses, req, res, params) {
-        const accounts = config.accounts
-        accounts.get(params.screen_name, (err, user) => {
+        accounts.get(params, (err, user) => {
             if (err) return onError(err, res)
-            else if (user.password !== params.password) {
-                err = new Error('wrong "password" - ' + params.password)
-                err.name = 'PasswordError'
-                err.data = params
-                console.dir(params)
-                console.dir(user)
-                return onError(err, res)
-            }
-            else {
-                ses.put(params.screen_name, err => {
-                    if (err) return onError(err, res)
-                    else redirect('/', res)
-                })
-            }
+            ses.put(user.id, err => {
+                if (err) return onError(err, res)
+                else redirect('/', res)
+            })
         })
     }
 }
