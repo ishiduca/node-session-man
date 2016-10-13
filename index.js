@@ -61,7 +61,7 @@ Session.prototype.get = function (f) {
     var me = this
     this.store.get(this.id, function (err, result) {
         if (err) return f(err)
-        if (! result) {
+        if (null === result || typeof result === 'undefined') {
             err = new Error('data not found')
             err.name = err.type = 'NotFoundError'
             return f(err)
