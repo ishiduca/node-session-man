@@ -1,6 +1,6 @@
 {
   "name": "session-man",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "session manager",
   "main": "index.js",
   "scripts": {

@@ -11,6 +11,7 @@ module.exports = exports = function (/*location, config*/) {
       , put (key, value, timeout, f) {
             store.put(key, value, f)
             if (timeout > 0) {
+                clear(key)
                 ids[key] = setTimeout(() => {
                     this.remove(key, err => {
                         if (err) console.log(err)
@@ -21,10 +22,14 @@ module.exports = exports = function (/*location, config*/) {
       , remove (key, f) {
             store.del(key, err => {
                 if (err) return f(err)
-                clearTimeout(ids[key])
-                delete ids[key]
+                clear(key)
                 f()
             })
         }
+    }
+
+    function clear (key) {
+        if (ids[key]) clearTimeout(ids[key])
+        delete ids[key]
     }
 }

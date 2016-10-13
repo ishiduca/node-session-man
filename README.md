@@ -2,57 +2,69 @@
 
 session manager
 
+### example
+
 ```js
-var http         = require('http')
-var url          = require('url')
-var SessionMan   = require('session-man')
-var sessionModel = require('./session/model')
-var session      = new SessionMan(sessionModel, {
-    key: 'app.session'
-  , timeout: 30 * 60 // 30min
+const http       = require('http')
+const url        = require('url')
+const router     = new (require('router-line').Router)
+const store      = require('./lib/session-store')
+const sessionMan = require('session-man')(store, {
+    timeout: 45
+  , key: 'count.session'
 })
 
-var app = http.createServer((req, res) => {
-    var ses      = session.create(req, res, {httpOnly: true})
-    var pathname = url.parse(req.url).pathname
+router.GET('/countup', session((ses, req, res, params) => {
+    count(ses, res, (c) => c + 1)
+}))
 
-    if (pathname === '/countup')
-        return count(c => c + 1)
+router.GET('/countdown', session((ses, req, res, params) => {
+    count(ses, res, (c) => c - 1)
+}))
 
-    if (pathname === '/countdown')
-        return count(c => c - 1)
+router.GET('/destroy', session((ses, req, res, params) => {
+    ses.remove(err => {
+        if (err) serverError(err, res)
+        else res.end('count destroy')
+    })
+}))
 
-    if (pathname === '/destroy')
-        return ses.remove(err => {
-            if (err) onEror(err)
-            else     print('destroy count')
-        })
-
-    else
-        res.end('go to "/countup", "/countdown", "/destroy"')
-
-    function count (f) {
-        ses.get((err, count) => {
-            if (err && err.type !== 'NotFoundError') return onError(err)
-            var c = f(Number(c || 0))
-            ses.put(String(c), err => {
-                if (err) onError(err)
-                else print(c)
-            })
-        })
-    }
-
-    function print (c) {
-        res.statusCode = 200
-        res.end(String(c))
-    }
-
-    function onError (err) {
-        res.statusCode = 500
-        res.end(String(err))
-        console.dir(err)
-    }
+const app = http.createServer((req, res) => {
+    const opt    = url.parse(req.url)
+    const result = router.route(req.method.toUpperCase(), opt.pathname)
+    if (result) result.value(req, res, result.params)
+    else        notFoundError(opt.pathname, res)
 })
 
-app.listen(9999)
+app.listen(9999, () => {
+    console.log(`server start to listen on port "9999"`)
+})
+
+function session (f) {
+    return (req, res, params) => {
+        const ses = sessionMan.create(req, res, {httpOnly: true})
+        f(ses, req, res, params)
+    }
+}
+
+function count (ses, res, f) {
+    ses.get((err, _c) => {
+        if (err) return serverError(err, res)
+        const c = f(_c)
+        ses.put(c, err => {
+            if (err) serverError(err, res)
+            else     res.end(String(c))
+        })
+    })
+}
+
+function serverError (err, res) {
+    res.statusCode = 500
+    res.end(String(err))
+}
+
+function notFoundError (pathname, res) {
+    res.statusCode = 404
+    res.end(`NotFoundError: "${pathname}" not found`)
+}
 ```
